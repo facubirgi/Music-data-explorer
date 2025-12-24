@@ -18,19 +18,42 @@ export interface Track {
   artists: { name: string }[];
   duration_ms: number;
   popularity: number;
+  preview_url?: string | null;
 }
 
 export interface AudioFeatures {
   id: string;
-  danceability: number; // 0.0 a 1.0 (Qué tan bailable es)
-  energy: number;       // 0.0 a 1.0 (Intensidad)
-  valence: number;      // 0.0 a 1.0 (Positividad/Felicidad)
-  tempo: number;        // BPM
+  danceability: number;
+  energy: number;
+  valence: number;
+  tempo: number;
   acousticness: number;
   loudness: number;
+  instrumentalness?: number;
+  liveness?: number;
 }
 
-// Un tipo combinado para nuestros gráficos
 export interface AnalyzedTrack extends Track {
   features: AudioFeatures;
+  valence: number;
+  energy: number;
+  tempo: number;
+  danceability: number;
+  acousticness: number;
+  instrumentalness: number;
+  liveness: number;
+  release_date?: string;
+}
+
+export interface SearchArtist {
+  id: string;
+  name: string;
+  image: string | null;
+  followers: number;
+  genres: string[];
+}
+
+export interface ApiError {
+  error: string;
+  message?: string;
 }

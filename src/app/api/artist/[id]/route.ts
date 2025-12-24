@@ -1,7 +1,11 @@
 import { getSpotifyClient } from '@/src/lib/spotify';
 import { NextResponse } from 'next/server';
 
-const generateStableFeature = (input: string, factor: number) => {
+/**
+ * Genera una característica estable basada en el hash del ID
+ * Usado como fallback cuando la API de Spotify no proporciona audio features
+ */
+const generateStableFeature = (input: string, factor: number): number => {
   let hash = 0;
   for (let i = 0; i < input.length; i++) {
     hash = input.charCodeAt(i) + ((hash << 5) - hash);
@@ -15,15 +19,27 @@ export async function GET(
 ) {
   try {
     const params = await props.params;
+    
+    if (!params.id) {
+      return NextResponse.json(
+        { error: 'ID de artista requerido' },
+        { status: 400 }
+      );
+    }
+
     const client = await getSpotifyClient();
 
     const artistData = await client.getArtist(params.id);
     const topTracksData = await client.getArtistTopTracks(params.id, 'US');
     const tracks = topTracksData.body.tracks;
 
-    if (!tracks.length) return NextResponse.json({ error: 'No tracks' }, { status: 404 });
+    if (!tracks.length) {
+      return NextResponse.json(
+        { error: 'No se encontraron tracks para este artista' },
+        { status: 404 }
+      );
+    }
 
-    // Intentamos obtener features reales, si falla (403), generamos un perfil completo
     const trackIds = tracks.map((t) => t.id);
     let features: any[] = [];
 
@@ -37,9 +53,9 @@ export async function GET(
         energy: generateStableFeature(t.id, 2),
         danceability: generateStableFeature(t.id, 3),
         tempo: 80 + (generateStableFeature(t.id, 4) * 100),
-        acousticness: generateStableFeature(t.id, 5),     // NUEVO
-        instrumentalness: generateStableFeature(t.id, 6), // NUEVO
-        liveness: generateStableFeature(t.id, 7),         // NUEVO
+        acousticness: generateStableFeature(t.id, 5),
+        instrumentalness: generateStableFeature(t.id, 6),
+        liveness: generateStableFeature(t.id, 7),
       }));
     }
 
@@ -53,14 +69,15 @@ export async function GET(
         release_date: track.album.release_date,
         popularity: track.popularity,
         duration_ms: track.duration_ms,
-        // Features completos
+        preview_url: track.preview_url, // <--- ¡AQUÍ ESTÁ LA MAGIA! Agregamos el audio
+        
         valence: feature.valence ?? 0.5,
         energy: feature.energy ?? 0.5,
         tempo: feature.tempo ?? 120,
         danceability: feature.danceability ?? 0.5,
-        acousticness: feature.acousticness ?? 0.1,         // NUEVO
-        instrumentalness: feature.instrumentalness ?? 0.0, // NUEVO
-        liveness: feature.liveness ?? 0.2,                 // NUEVO
+        acousticness: feature.acousticness ?? 0.1,
+        instrumentalness: feature.instrumentalness ?? 0.0,
+        liveness: feature.liveness ?? 0.2,
       };
     });
 
@@ -69,7 +86,16 @@ export async function GET(
       tracks: analyzedTracks,
     });
 
-  } catch (error: any) {
-    return NextResponse.json({ error: 'Error' }, { status: 500 });
+  } catch (error) {
+    console.error('Error obteniendo datos del artista:', error);
+    
+    const errorMessage = error instanceof Error 
+      ? error.message 
+      : 'Error al obtener datos del artista';
+    
+    return NextResponse.json(
+      { error: errorMessage },
+      { status: 500 }
+    );
   }
 }
