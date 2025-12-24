@@ -4,7 +4,7 @@
 
 
 ## 🚀 Demo en Vivo
-[**Ver Demo en Vivo**]([https://tuproyecto.vercel.app](https://music-data-explorer-nine.vercel.app/)) 
+[**Ver Demo en Vivo**](https://music-data-explorer-nine.vercel.app/) 
 
 ## 📖 Sobre el Proyecto
 
