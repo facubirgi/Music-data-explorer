@@ -7,7 +7,9 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  ReferenceLine 
+  ReferenceLine,
+  Label,
+  LabelList
 } from 'recharts';
 
 interface EmotionalMapProps {
@@ -51,24 +53,53 @@ export function EmotionalMap({
         </p>
       )}
 
+      {/* Leyenda de cuadrantes */}
+      <div className="grid grid-cols-2 gap-2 mb-4 text-xs">
+        <div className="p-2 rounded" style={{ backgroundColor: '#1a1a1a', borderLeft: '3px solid #4ade80' }}>
+          <span className="font-bold text-green-400">Valence (Positividad)</span>
+          <p className="text-neutral-400 text-[10px]">0 = Triste/Negativo • 1 = Feliz/Positivo</p>
+        </div>
+        <div className="p-2 rounded" style={{ backgroundColor: '#1a1a1a', borderLeft: '3px solid #60a5fa' }}>
+          <span className="font-bold text-blue-400">Energy (Energía)</span>
+          <p className="text-neutral-400 text-[10px]">0 = Calmado • 1 = Enérgico</p>
+        </div>
+      </div>
+
       <div className="h-75 w-full mt-2">
         <ResponsiveContainer width="100%" height="100%">
-          <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
+          <ScatterChart margin={{ top: 20, right: 20, bottom: 40, left: 60 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#333" />
             <XAxis 
               type="number" 
               dataKey="valence" 
               name="Valence" 
               domain={[0, 1]} 
-              tick={{ fill: '#555' }} 
-            />
+              tick={{ fill: '#4ade80', fontSize: 11 }}
+              tickFormatter={(value) => (value * 100).toFixed(0)}
+            >
+              <Label 
+                value="Valence (Positividad →)" 
+                position="bottom" 
+                offset={20}
+                style={{ fill: '#4ade80', fontSize: 12, fontWeight: 'bold' }} 
+              />
+            </XAxis>
             <YAxis 
               type="number" 
               dataKey="energy" 
               name="Energy" 
               domain={[0, 1]} 
-              tick={{ fill: '#555' }} 
-            />
+              tick={{ fill: '#60a5fa', fontSize: 11 }}
+              tickFormatter={(value) => (value * 100).toFixed(0)}
+            >
+              <Label 
+                value="Energy (Energía ↑)" 
+                position="left" 
+                angle={-90}
+                offset={40}
+                style={{ fill: '#60a5fa', fontSize: 12, fontWeight: 'bold', textAnchor: 'middle' }} 
+              />
+            </YAxis>
             <ReferenceLine x={0.5} stroke="#444" strokeDasharray="3 3" />
             <ReferenceLine y={0.5} stroke="#444" strokeDasharray="3 3" />
             

@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Download, Share2 } from 'lucide-react';
-import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 import { Toaster, toast } from 'sonner';
 
 import { useArtistData } from '@/src/hooks/useArtistData';
@@ -39,21 +39,20 @@ export default function ArtistAnalysisPage() {
 
     try {
       await new Promise(resolve => setTimeout(resolve, 500));
-      const canvas = await html2canvas(exportRef.current, {
+      
+      const dataUrl = await toPng(exportRef.current, {
+        cacheBust: true,
         backgroundColor: '#0a0a0a',
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        onclone: (doc) => {
-          doc.querySelectorAll('*').forEach((el: any) => {
-            if (el.style) el.style.boxShadow = 'none';
-          });
+        pixelRatio: 2,
+        filter: (node) => {
+          // Filtrar elementos que puedan causar problemas
+          return node.tagName !== 'IFRAME' && node.tagName !== 'VIDEO';
         }
       });
       
       const link = document.createElement('a');
       link.download = `${data.artist.name.replace(/\s+/g, '_')}_Analysis.png`;
-      link.href = canvas.toDataURL('image/png', 1.0);
+      link.href = dataUrl;
       link.click();
       
       toast.success('¡Reporte descargado!', { id: toastId });

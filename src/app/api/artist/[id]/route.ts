@@ -69,7 +69,7 @@ export async function GET(
         release_date: track.album.release_date,
         popularity: track.popularity,
         duration_ms: track.duration_ms,
-        preview_url: track.preview_url, // <--- ¡AQUÍ ESTÁ LA MAGIA! Agregamos el audio
+        preview_url: track.preview_url,
         
         valence: feature.valence ?? 0.5,
         energy: feature.energy ?? 0.5,
